@@ -1,0 +1,339 @@
+{
+  "tests": [
+    {
+      "name": "swap",
+      "source": "examples/swap.sir",
+      "tool": "ir-run",
+      "cases": [
+        {
+          "input": {"entry": "swap", "args": [{"i64": "8"}, {"i64": "3"}, {"i64": "1"}]},
+          "expected": {"result": {"i64": "-5"}, "events": []}
+        }
+      ],
+      "passes": [
+        ["lower-cfg"],
+        ["sccp", "lower-cfg"],
+        ["cse", "dce", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "runtime",
+      "source": "examples/runtime.sir",
+      "tool": "ir-run",
+      "cases": [
+        {
+          "input": {"entry": "main", "args": [{"bool": true}, {"i64": "10"}]},
+          "expected": {
+            "result": {"i64": "16"},
+            "events": [{"label": "true", "value": {"i64": "16"}}]
+          }
+        }
+      ],
+      "passes": [["ssa", "lower-cfg"]]
+    },
+    {
+      "name": "optimise-stella",
+      "source": "examples/optimise.stella",
+      "tool": "ir-run-source",
+      "cases": [
+        {"input": {"argument": {"i64": "4"}}, "expected": null}
+      ],
+      "passes": [
+        ["ssa", "sccp", "lower-cfg"],
+        ["ssa", "cse", "dce", "lower-cfg"],
+        ["ssa", "sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+
+    {
+      "name": "sccp-const-branch",
+      "source": "examples/test-sccp-const-branch.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": []},
+         "expected": {"result": {"i64": "42"}, "events": []}}
+      ],
+      "passes": [["ssa", "sccp", "lower-cfg"]]
+    },
+    {
+      "name": "sccp-div-fold",
+      "source": "examples/test-sccp-div-fold.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": []},
+         "expected": {"result": {"i64": "5"}, "events": []}}
+      ],
+      "passes": [["ssa", "sccp", "lower-cfg"]]
+    },
+    {
+      "name": "sccp-phi-mixed",
+      "source": "examples/test-sccp-phi-mixed.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true}]},
+         "expected": {"result": {"i64": "5"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}]},
+         "expected": {"result": {"i64": "7"}, "events": []}}
+      ],
+      "passes": [["sccp", "lower-cfg"]]
+    },
+
+    {
+      "name": "dce-pure-unused",
+      "source": "examples/test-dce-pure-unused.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "5"}]},
+         "expected": {"result": {"i64": "6"}, "events": []}}
+      ],
+      "passes": [["dce", "lower-cfg"]]
+    },
+    {
+      "name": "dce-impure-kept",
+      "source": "examples/test-dce-impure-kept.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "5"}, {"i64": "2"}]},
+         "expected": {"result": {"i64": "6"}, "events": []}}
+      ],
+      "passes": [["dce", "lower-cfg"]]
+    },
+    {
+      "name": "dce-runtime-kept",
+      "source": "examples/test-dce-runtime-kept.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "5"}]},
+         "expected": null}
+      ],
+      "passes": [["dce", "lower-cfg"]]
+    },
+
+    {
+      "name": "cse-duplicate",
+      "source": "examples/test-cse-duplicate.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "3"}, {"i64": "5"}]},
+         "expected": {"result": {"i64": "16"}, "events": []}}
+      ],
+      "passes": [["cse", "lower-cfg"]]
+    },
+    {
+      "name": "cse-dominance",
+      "source": "examples/test-cse-dominance.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "3"}, {"i64": "5"}, {"bool": true}]},
+         "expected": {"result": {"i64": "8"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "3"}, {"i64": "5"}, {"bool": false}]},
+         "expected": {"result": {"i64": "8"}, "events": []}}
+      ],
+      "passes": [["cse", "lower-cfg"]]
+    },
+    {
+      "name": "cse-copy-chain",
+      "source": "examples/test-cse-copy-chain.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "5"}]},
+         "expected": {"result": {"i64": "6"}, "events": []}}
+      ],
+      "passes": [["cse", "lower-cfg"]]
+    },
+
+    {
+      "name": "ssa-nested",
+      "source": "examples/test-ssa-nested.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": true},  {"i64": "0"}]},
+         "expected": {"result": {"i64": "1"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": false}, {"i64": "0"}]},
+         "expected": {"result": {"i64": "2"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}, {"bool": true},  {"i64": "0"}]},
+         "expected": {"result": {"i64": "3"}, "events": []}}
+      ],
+      "passes": [["ssa", "lower-cfg"]]
+    },
+    {
+      "name": "lower-critical",
+      "source": "examples/test-lower-critical.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": true}]},
+         "expected": {"result": {"i64": "10"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": false}]},
+         "expected": {"result": {"i64": "30"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}, {"bool": true}]},
+         "expected": {"result": {"i64": "20"}, "events": []}}
+      ],
+      "passes": [["lower-cfg"]]
+    },
+    {
+      "name": "pipeline-trivial-phi",
+      "source": "examples/test-pipeline-trivial-phi.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true}, {"i64": "7"}]},
+         "expected": {"result": {"i64": "7"}, "events": []}}
+      ],
+      "passes": [["pipeline-cfg"]]
+    },
+    {
+      "name": "pipeline-non-trivial-phi",
+      "source": "examples/test-pipeline-non-trivial-phi.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true},  {"i64": "7"}, {"i64": "3"}]},
+         "expected": {"result": {"i64": "7"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}, {"i64": "7"}, {"i64": "3"}]},
+         "expected": {"result": {"i64": "3"}, "events": []}}
+      ],
+      "passes": [["pipeline-cfg"]]
+    },
+
+    {
+      "name": "loop-3merge",
+      "source": "examples/test-loop-3merge.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": true}]},
+         "expected": {"result": {"i64": "20"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": true},  {"bool": false}]},
+         "expected": {"result": {"i64": "30"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}, {"bool": true}]},
+         "expected": {"result": {"i64": "10"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"bool": false}, {"bool": false}]},
+         "expected": {"result": {"i64": "10"}, "events": []}}
+      ],
+      "passes": [
+        ["lower-cfg"],
+        ["sccp", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "sccp-loop-info",
+      "source": "examples/test-sccp-loop-info.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "10"}]},
+         "expected": {"result": {"i64": "40"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "5"}]},
+         "expected": {"result": {"i64": "20"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "1"}]},
+         "expected": {"result": {"i64": "4"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "0"}]},
+         "expected": {"result": {"i64": "0"}, "events": []}}
+      ],
+      "passes": [
+        ["lower-cfg"],
+        ["sccp", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "dce-dead-cycle",
+      "source": "examples/test-dce-dead-cycle.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "0"},  {"bool": true}]},
+         "expected": {"result": {"i64": "100"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "42"}, {"bool": false}]},
+         "expected": {"result": {"i64": "142"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "1"},  {"bool": true}]},
+         "expected": {"result": {"i64": "101"}, "events": []}}
+      ],
+      "passes": [
+        ["dce", "lower-cfg"],
+        ["sccp", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "cse-dominance-positive",
+      "source": "examples/test-cse-dominance-positive.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "1"}, {"i64": "2"}, {"bool": true}]},
+         "expected": {"result": {"i64": "4"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "1"}, {"i64": "2"}, {"bool": false}]},
+         "expected": {"result": {"i64": "5"}, "events": []}}
+      ],
+      "passes": [["cse", "lower-cfg"]]
+    },
+    {
+      "name": "sccp-overflow",
+      "source": "examples/test-sccp-overflow.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": []},
+         "expected": {"result": {"i64": "-9223372036854775808"}, "events": []}}
+      ],
+      "passes": [
+        ["sccp", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "sccp-divzero",
+      "source": "examples/test-sccp-divzero.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "10"}, {"bool": true}]},
+         "expected": {"result": {"i64": "11"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "3"},  {"bool": true}]},
+         "expected": {"result": {"i64": "4"}, "events": []}}
+      ],
+      "passes": [
+        ["sccp", "lower-cfg"],
+        ["sccp", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "runtime-preserved",
+      "source": "examples/test-runtime-preserved.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "10"}]},
+         "expected": null}
+      ],
+      "passes": [
+        ["dce", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "swap-cycle",
+      "source": "examples/test-swap-cycle.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": [{"i64": "8"}, {"i64": "3"}, {"i64": "1"}]},
+         "expected": {"result": {"i64": "-5"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "8"}, {"i64": "3"}, {"i64": "2"}]},
+         "expected": {"result": {"i64": "5"}, "events": []}},
+        {"input": {"entry": "test", "args": [{"i64": "8"}, {"i64": "3"}, {"i64": "0"}]},
+         "expected": {"result": {"i64": "5"}, "events": []}}
+      ],
+      "passes": [
+        ["lower-cfg"],
+        ["sccp", "lower-cfg"],
+        ["cse", "dce", "lower-cfg"]
+      ]
+    },
+    {
+      "name": "sccp-delete-all",
+      "source": "examples/test-sccp-delete-all.sir",
+      "tool": "ir-run",
+      "cases": [
+        {"input": {"entry": "test", "args": []},
+         "expected": {"result": {"i64": "84"}, "events": []}}
+      ],
+      "passes": [
+        ["sccp", "lower-cfg"],
+        ["sccp", "cse", "dce", "lower-cfg"]
+      ]
+    }
+  ]
+}

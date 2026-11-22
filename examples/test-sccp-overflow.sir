@@ -1,0 +1,11 @@
+stella-ir 1 ssa "stella-ir-base-v1";
+
+export @test;
+
+function @test() -> i64 {
+  entry ^entry;
+  ^entry:
+    [%max: i64] = copy(9223372036854775807);
+    [%ovf: i64] = add(%max, 1);
+    return %ovf;
+}

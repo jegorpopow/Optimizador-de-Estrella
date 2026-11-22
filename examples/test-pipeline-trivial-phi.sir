@@ -1,0 +1,18 @@
+stella-ir 1 cfg "stella-ir-base-v1";
+
+export @test;
+
+function @test(%c: bool, %x: i64) -> i64 {
+  locals (%z: i64);
+  entry ^entry;
+  ^entry:
+    branch %c, ^left, ^right;
+  ^left:
+    [%z: i64] = copy(%x);
+    jump ^join;
+  ^right:
+    [%z: i64] = copy(%x);
+    jump ^join;
+  ^join:
+    return %z;
+}

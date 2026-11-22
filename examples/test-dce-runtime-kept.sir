@@ -1,0 +1,11 @@
+stella-ir 1 ssa "stella-ir-base-v1";
+
+export @test;
+
+function @test(%x: i64) -> i64 {
+  entry ^entry;
+  ^entry:
+    [%a: i64] = add(%x, 1);
+    [] = runtime "trace.emit"(%a) {"label": "test"};
+    return %a;
+}

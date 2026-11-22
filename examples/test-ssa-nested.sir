@@ -1,0 +1,23 @@
+stella-ir 1 cfg "stella-ir-base-v1";
+
+export @test;
+
+function @test(%c: bool, %d: bool, %x: i64) -> i64 {
+  locals (%a: i64);
+  entry ^entry;
+  ^entry:
+    branch %c, ^outer_then, ^outer_else;
+  ^outer_then:
+    branch %d, ^inner_then, ^inner_else;
+  ^inner_then:
+    [%a: i64] = add(%x, 1);
+    jump ^outer_join;
+  ^inner_else:
+    [%a: i64] = add(%x, 2);
+    jump ^outer_join;
+  ^outer_else:
+    [%a: i64] = add(%x, 3);
+    jump ^outer_join;
+  ^outer_join:
+    return %a;
+}

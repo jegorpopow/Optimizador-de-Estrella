@@ -1,0 +1,12 @@
+stella-ir 1 ssa "stella-ir-base-v1";
+
+export @test;
+
+function @test(%x: i64) -> i64 {
+  entry ^entry;
+  ^entry:
+    [%a: i64] = copy(%x);
+    [%b: i64] = copy(%a);
+    [%c: i64] = add(%b, 1);
+    return %c;
+}

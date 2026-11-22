@@ -1,0 +1,20 @@
+stella-ir 1 ssa "stella-ir-base-v1";
+
+export @test; 
+
+function @test(%x: i64, %y: i64, %c: bool) -> i64 {
+  entry ^entry;
+  ^entry:
+    [%a: i64] = add(%x, %y);
+    branch %c, ^then, ^else;
+  ^then:
+    [%b: i64] = add(%x, %y);
+    [%r1: i64] = add(%b, 1);
+    jump ^join;
+  ^else:
+    [%r2: i64] = add(%a, 2);
+    jump ^join;
+  ^join:
+    %r: i64 = phi {^then: %r1, ^else: %r2};
+    return %r;
+}
