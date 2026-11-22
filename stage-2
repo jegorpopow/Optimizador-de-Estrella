@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# stage-2 — Stella IR optimiser.
+# Reads IR (JSON) from stdin, writes IR (JSON) to stdout.
+# Mode is selected by the first positional argument.
+
+set -euo pipefail
+
+# Repo root = directory where this script lives.
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# Make `python3 -m optimiser` resolvable regardless of the caller's CWD.
+export PYTHONPATH="${script_dir}${PYTHONPATH:+:${PYTHONPATH}}"
+
+usage() {
+    cat <<'EOF'
+usage: stage-2 MODE < input.json > output.json
+       stage-2 --help
+       stage-2 --version
+
+MODE one of:
+  ssa           CFG  → SSA
+  sccp          sparse conditional constant propagation
+  dce           dead code elimination
+  cse           common subexpression elimination
+  lower-cfg     SSA  → CFG
+  pipeline-cfg  full CFG → CFG optimisation pipeline
+
+Reads Stella IR (JSON) from stdin, writes Stella IR (JSON) to stdout.
+All diagnostics go to stderr. Exit code from the Python driver is preserved.
+EOF
+}
+
+mode="${1:-}"
+case "$mode" in
+    "")
+        usage >&2
+        exit 2
+        ;;
+    -h|--help)
+        usage
+        exit 0
+        ;;
+    --version)
+        echo "stage-2 (Stella IR optimiser)"
+        exit 0
+        ;;
+esac
+
+# Drop the mode from "$@"; the rest is forwarded to the Python driver.
+shift
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "stage-2: python3 not found in PATH" >&2
+    exit 127
+fi
+
+# `exec` → process is replaced, so the exit code and signals are those of
+# python3; `set -euo pipefail` does not interfere with the child.
+exec python3 -m optimiser "$mode" "$@"
