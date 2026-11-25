@@ -256,7 +256,8 @@ class SCCP:
                 instructions=[
                     Instructions.map_args(i, simplify_operand)
                     for i in old.instructions
-                    if any(
+                    if not Instructions.is_pure(i)
+                    or any(
                         not AbstractEvaluation.is_concrete(model[v.name])
                         for v in Instructions.defined_vars(i)
                     )
